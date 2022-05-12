@@ -72,7 +72,7 @@ def yolo3(path, path2, network, layers_names_output, labels):
     # In this way image is opened already as numpy array
     # WARNING! OpenCV by default reads images in BGR format
     image_BGR = path
-    image_BGR2 = path2
+    image_BGR2 = path2.copy()
 
     # Check point
     # Showing image shape
@@ -288,7 +288,7 @@ def yolo3(path, path2, network, layers_names_output, labels):
 
     # Saving resulted image in jpg format by OpenCV function
     # that uses extension to choose format to save with
-    return image_BGR2
+    return image_BGR2, results, bounding_boxes
 
 def cont_detect(image):
     image2 = image.copy()
@@ -320,20 +320,29 @@ def get_objects_yolo(path):
                             10, size)
     network, a1, a2 = set_up_network()
     count = 0
+    prev_frame = None
     while True:
         isTrue, frame = vid.read()
         count += 1
+        if prev_frame is None:
+            gray1 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            gray1 = cv2.GaussianBlur(gray1, (21, 21), 0)
+            prev_frame = gray1
         if (count % 40 == 0):
             blank = np.zeros(frame.shape, dtype='uint8')
             saliency = cv2.saliency.StaticSaliencyFineGrained_create()
             (success, saliencyMap) = saliency.computeSaliency(frame)
             saliencyMap = (saliencyMap * 255).astype("uint8")
             threshMap3 = cv2.merge((saliencyMap,saliencyMap,saliencyMap))
-            result = yolo3(threshMap3, frame, network, a1, a2)
+            result, list, boxes = yolo3(threshMap3, frame, network, a1, a2)
+            print(list)
+            most_salient, prev_frame = get_most_salient(frame, prev_frame, list, boxes)
 
             cv2.imshow("Original", frame)
             cv2.imshow("Saliency", saliencyMap)
             cv2.imshow("Result", result)
+            print("hello")
+            cv2.imshow("Most Salient", most_salient)
             result_vid.write(result)
 
         key = cv2.waitKey(1) & 0xFF
@@ -344,4 +353,30 @@ def get_objects_yolo(path):
     result_vid.release()
     cv2.destroyAllWindows()
     print("Done")
+
+def get_most_salient(frame, prev_frame, list, boxes):
+    new_frame = frame.copy()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (21, 21), 0)
+    frameDelta = cv2.absdiff(prev_frame, gray)
+    thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
+    list_of_scores = []
+    if len(list) > 0:
+        for i in list.flatten():
+            x_min, y_min, box_width, box_height = boxes[i][0], boxes[i][1], boxes[i][2], boxes[i][3]
+            area = box_width*box_height
+            change_patch = np.sum(thresh[y_min:y_min+box_height, x_min:x_min+box_width])/area
+            list_of_scores.append(change_patch)
+        
+        max_score = np.argmax(list_of_scores)
+        x, y, width, height = boxes[max_score][0], boxes[max_score][1], boxes[max_score][2], boxes[max_score][3]
+        cv2.rectangle(new_frame, (x, y),(x + width, y + height),(0,0,255), 2)
+
+    return new_frame, gray
+
+def test_me():
+    print("hello")
+
+
+get_objects_yolo(r"C:\Users\shush\OneDrive\Documents\Projects\OpenCVtut\videoplayback.mp4")
 
