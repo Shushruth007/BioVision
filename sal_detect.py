@@ -2,6 +2,10 @@ import numpy as np
 import cv2
 import time
 
+# Dependency Files
+CLASS_NAMES = "C:\BioVision_ds\Saliency\classes.names"
+YOLO_CONFG = "C:\\Users\\shush\\darknet\\build\\darknet\\x64\\cfg\\yolov3bv.cfg"
+YOLO_WEIGHTS = "C:\\Users\\shush\\darknet\\build\\darknet\\x64\\backup\\yolov3_last.weights"
 
 def set_up_network():
      # Loading COCO class labels from file
@@ -10,7 +14,7 @@ def set_up_network():
     # r'yolo-coco-data\coco.names'
     # or:
     # 'yolo-coco-data\\coco.names'
-    with open("C:\BioVision_ds\Saliency\classes.names") as f:
+    with open(CLASS_NAMES) as f:
         # Getting labels reading every line
         # and putting them into the list
         labels = [line.strip() for line in f]
@@ -23,8 +27,7 @@ def set_up_network():
     # or:
     # 'yolo-coco-data\\yolov3.cfg'
     # 'yolo-coco-data\\yolov3.weights'
-    network = cv2.dnn.readNetFromDarknet("C:\\Users\\shush\\darknet\\build\\darknet\\x64\\cfg\\yolov3bv.cfg",
-                                         "C:\\Users\\shush\\darknet\\build\\darknet\\x64\\backup\\yolov3_last.weights")
+    network = cv2.dnn.readNetFromDarknet(YOLO_CONFG, YOLO_WEIGHTS)
 
     # Getting list with names of all layers from YOLO v3 network
     layers_names_all = network.getLayerNames()
@@ -328,6 +331,8 @@ def get_objects_yolo(path):
             gray1 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             gray1 = cv2.GaussianBlur(gray1, (21, 21), 0)
             prev_frame = gray1
+
+
         if (count % 40 == 0):
             blank = np.zeros(frame.shape, dtype='uint8')
             saliency = cv2.saliency.StaticSaliencyFineGrained_create()
@@ -341,7 +346,6 @@ def get_objects_yolo(path):
             cv2.imshow("Original", frame)
             cv2.imshow("Saliency", saliencyMap)
             cv2.imshow("Result", result)
-            print("hello")
             cv2.imshow("Most Salient", most_salient)
             result_vid.write(result)
 
@@ -374,8 +378,7 @@ def get_most_salient(frame, prev_frame, list, boxes):
 
     return new_frame, gray
 
-def test_me():
-    print("hello")
+
 
 
 get_objects_yolo(r"C:\Users\shush\OneDrive\Documents\Projects\OpenCVtut\videoplayback.mp4")
