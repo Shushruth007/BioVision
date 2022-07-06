@@ -11,9 +11,7 @@ This projects aims to create a tool that use prevalent computer vision and machi
 To install dependencies execute the following command in a terminal
 
 ```
-{
 pip install -r requirements.txt
-}
 ```
 
 ## Usage
