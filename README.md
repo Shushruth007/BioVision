@@ -17,6 +17,8 @@ pip install -r requirements.txt
 ## Usage
 Once setup execute the following command to run saliency detection script
 
+```
 python sal_detect_2.py [path_to_input_file]
+```
 
 
