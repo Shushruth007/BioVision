@@ -6,6 +6,7 @@ One key metric to assess the effectiveness of such representations in building u
 
 This projects aims to create a tool that use prevalent computer vision and machine learning techniques to create a computational model that extracts the features in a representation and identifies the most salient one
 
+See Poster for details on how the algorithm functions
 
 ## Setup
 To install dependencies execute the following command in a terminal
