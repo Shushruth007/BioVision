@@ -10,7 +10,11 @@ This projects aims to create a tool that use prevalent computer vision and machi
 ## Setup
 To install dependencies execute the following command in a terminal
 
+```
+{
 pip install -r requirements.txt
+}
+```
 
 ## Usage
 Once setup execute the following command to run saliency detection script
